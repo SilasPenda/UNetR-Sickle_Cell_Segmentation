@@ -161,7 +161,7 @@ def get_data_loaders(IMAGE_HEIGHT, IMAGE_WIDTH):
     train_dataset = LoadTransformDataset(images_dir=train_images_dir, labels_dir=train_labels_dir, transform=train_transforms)
     val_dataset = LoadTransformDataset(images_dir=val_images_dir, labels_dir=val_labels_dir, transform=val_transforms)
 
-    batch_size = 16
+    batch_size = 8
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=2)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, pin_memory=True, num_workers=2)
 
