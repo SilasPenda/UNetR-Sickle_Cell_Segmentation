@@ -66,13 +66,17 @@ def main():
         for images, masks in tqdm(train_loader, desc="Training"):
             images = images.to(device)
             masks = masks.to(device, dtype=torch.long).squeeze(1)
-
             optimizer.zero_grad()
         
             with torch.amp.autocast("cuda"):
+                # print("image shape: ", images.shape)
                 # Forward pass
                 preds = model(images)
+                # print("preds_classes: ", preds.unique())
                 #   loss = criterion(pred, masks)
+                # print("mask_classes: ", masks.unique())  # Should show class indices (e.g., 0, 1, 2, 3)
+                # print("preds shape: ", preds.shape, preds.min(), preds.max())
+
                 loss = dice_loss(preds, masks)
                 running_train_loss += loss.item()
         
@@ -98,6 +102,8 @@ def main():
                 masks = masks.to(device, dtype=torch.long).squeeze(1)
 
                 preds = model(images)
+                # print("mask_shape: ", masks.unique())  # Should show class indices (e.g., 0, 1, 2, 3)
+                # print("preds shape: ", preds.shape, preds.min(), preds.max())
                 # loss = criterion(pred, masks)
                 loss = dice_loss(preds, masks)
                 running_val_loss += loss.item()

@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from PIL import Image
+import matplotlib.pyplot as plt
 
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -46,20 +47,17 @@ class LoadTransformDataset(Dataset):
         image = Image.open(image_path)  # Open directly as a PIL Image
         rgb_mask = Image.open(rgb_mask_path)
 
-        # Convert mask to class indices
-        rgb_mask_np = np.array(rgb_mask)  # Convert PIL image to NumPy array
-        mask = self.rgb_to_class(rgb_mask_np)
-
-        # Convert the mask back to a PIL Image for transformation
-        mask = Image.fromarray(mask)
-
-        # Apply transformations, if any
         if self.transform:
             image = self.transform(image)
-            mask = self.transform(mask)
-        else:
-            image = TF.to_tensor(image)
-            mask = TF.to_tensor(mask).squeeze(0)  # Remove channel dimension
+            rgb_mask = self.transform(rgb_mask)
+
+        # Convert mask to class indices
+        mask = self.rgb_to_class(np.array(rgb_mask))
+ 
+        image = TF.to_tensor(image)
+        mask = torch.tensor(mask, dtype=torch.long) 
+        
+        # mask = TF.to_tensor(mask).squeeze(0)  # Remove channel dimension
 
 
         return image, mask
@@ -139,13 +137,13 @@ def get_data_loaders(IMAGE_HEIGHT, IMAGE_WIDTH):
         transforms.RandomRotation(35),
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.RandomVerticalFlip(p=0.1),
-        transforms.ToTensor(),
+        # transforms.ToTensor(),
     ])
 
     # Define validation transformations
     val_transforms = transforms.Compose([
         transforms.Resize((IMAGE_HEIGHT, IMAGE_WIDTH)),
-        transforms.ToTensor(),
+        # transforms.ToTensor(),
     ])
 
     # Loading config and setting up paths (same as before)
@@ -171,3 +169,33 @@ def get_data_loaders(IMAGE_HEIGHT, IMAGE_WIDTH):
     # val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     return train_loader, val_loader
+
+
+
+if __name__ == "__main__":
+    train_loader, val_loader = get_data_loaders(256, 256)
+
+    for images, labels in val_loader:
+        # Process the first image
+        # print(images[0].shape)
+        image = images[0].cpu().permute(1, 2, 0).numpy()  # Convert to HWC format
+        image = (image * 255).astype(np.uint8)  # Rescale and convert to uint8
+        # print(f"Image min: {image.min()}, max: {image.max()}")
+
+        plt.subplot(1, 2, 1)  # Create a 1x2 grid, use the first subplot
+        plt.imshow(image)  # Image is in (H, W, C) format after permute
+        # plt.title("Image")
+        # print(np.unique(labels[0]))
+        # print(labels[0].shape)
+
+        # Process the first label (remove the channel dimension)
+        label = labels[0].cpu().squeeze().numpy()
+
+        plt.subplot(1, 2, 2)  # Use the second subplot
+        plt.imshow(label, cmap="gray")  # Use cmap="gray" for single-channel images
+        plt.title("Label")
+
+        # Save the figure
+        plt.savefig("save.png")
+
+        break
