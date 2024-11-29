@@ -54,6 +54,9 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
     best_loss = 0  # Initialize best validation Dice score
 
+    train_losses = []
+    val_losses = []
+
 
     os.makedirs("models", exist_ok=True)
 
@@ -77,22 +80,16 @@ def main():
                 # print("mask_shape: ", masks.shape)
                 # print("mask_classes: ", masks.unique())  # Should show class indices (e.g., 0, 1, 2, 3)
                 # print("preds shape: ", preds.shape, preds.min(), preds.max())
-
-                loss = dice_loss(preds, masks)
-                # loss = criterion(preds, masks)
-                running_train_loss += loss.item()
         
-            # dice = dice_score(pred , masks, n_classes)
-
-            # Backward pass
-            # loss.backward()
-            # optimizer.step()
+            loss = dice_loss(preds, masks)
+            # loss = criterion(preds, masks)
+            running_train_loss += loss.item()
 
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
                     
-        train_loss = running_train_loss / len(train_loader)
+        train_losses.append(running_train_loss / len(train_loader))
 
         
         # Validation phase
@@ -110,31 +107,21 @@ def main():
                 loss = dice_loss(preds, masks)
                 running_val_loss += loss.item()
 
-        val_loss = running_val_loss / len(val_loader)
+        val_losses.append(running_val_loss / len(val_loader))
 
         print(f"Epoch {epoch + 1}/{num_epochs} - "
-            f"Train Loss: {train_loss:.2f}, - "
-            f"Val Loss: {val_loss:.2f}")
+            f"Train Loss: {train_losses[-1]:.2f}, - "
+            f"Val Loss: {val_losses[-1]:.2f}")
         
-        # plot loss
-        plt.figure(figsize=(10, 10))
-
-        plt.subplot(2, 2, 1)
-        plt.plot(train_loss)
-        plt.title("Train Loss")
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.axis("off")
-
-        plt.subplot(2, 2, 2)
-        plt.plot(val_loss)
-        plt.title("Val Loss")
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.axis("off")
-
-        plt.tight_layout()
         
+        # Plot train and validation losses
+        plt.plot(range(1, len(train_losses) + 1), train_losses, label="Train Loss")
+        plt.plot(range(1, len(val_losses) + 1), val_losses, label="Validation Loss")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.legend()
+        plt.title("Train and Validation Loss Over Epochs")     
+
         plt.savefig(loss_plot_path)
         plt.close()
 
@@ -146,10 +133,9 @@ def main():
         save_checkpoint(checkpoint, filename=last_model_path)
         
         # Save the best model
-        if val_loss < best_loss:
+        if val_losses[-1] < best_loss:
             save_checkpoint(checkpoint, filename=best_model_path)
-            best_loss = val_loss
-            # print(f'Best model updated at epoch {epoch + 1}')
+            best_loss = val_losses[-1]
 
 
 if __name__ == "__main__":

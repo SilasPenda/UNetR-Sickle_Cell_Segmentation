@@ -29,7 +29,7 @@ module list
 cd /work/c-2iia/sp165339/Sickle_Cell_Segmentation
 
 ## run script
-python train.py --epochs 100
+python train.py --epochs 300 --checkpoint results/train_1/last.pth
 
 
 ## printf "\n --- end of python execution ---\n\n"
