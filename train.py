@@ -95,7 +95,7 @@ def main():
         with torch.no_grad():
             for images, masks in tqdm(val_loader, desc="Validation"):
                 images = images.to(device)
-                masks = masks.to(device, dtype=torch.long)
+                masks = masks.to(device, dtype=torch.long).squeeze(1)
 
                 preds = model(images)
                 # loss = criterion(pred, masks)

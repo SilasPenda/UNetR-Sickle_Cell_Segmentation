@@ -59,7 +59,8 @@ class LoadTransformDataset(Dataset):
             mask = self.transform(mask)
         else:
             image = TF.to_tensor(image)
-            mask = TF.to_tensor(mask)
+            mask = TF.to_tensor(mask).squeeze(0)  # Remove channel dimension
+
 
         return image, mask
 
