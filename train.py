@@ -10,16 +10,14 @@ import torch.nn as nn
 from src.dataset import get_data_loaders
 
 from src.model import UNETR_2D
-from src.utils import get_config, dice_loss, save_checkpoint, load_checkpoint
+from src.utils import dice_loss, save_checkpoint, load_checkpoint
+
 
 def main():
     parser = argparse.ArgumentParser(description='Train a 2D U-Net Segmentation model.')
     parser.add_argument('-e', '--epochs', type=int, help='Number of Epochs', required=True)
     parser.add_argument('-p', '--checkpoint', type=str, default=None, help='Model checkpoint', required=False)
     args = parser.parse_args()
-
-    # Loading config and setting up paths (same as before)
-    config = get_config(config_filepath=os.path.join(os.getcwd(), "config.yaml"))
    
     results_dir = os.path.join(os.getcwd(), "results")
     os.makedirs(results_dir, exist_ok=True)
@@ -35,7 +33,7 @@ def main():
     #     loss_fn = nn.BCEWithLogitsLoss()
     #     activ_func = "Sigmoid"
     # else:
-    # criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss()
 
     # scaler = torch.GradScaler()
     IMAGE_HEIGHT = 256
@@ -65,19 +63,23 @@ def main():
         running_train_loss = 0.0
         for images, masks in tqdm(train_loader, desc="Training"):
             images = images.to(device)
-            masks = masks.to(device, dtype=torch.long).squeeze(1)
+            masks = masks.to(device).squeeze(1)
             optimizer.zero_grad()
+            # print(images.shape)
         
             with torch.amp.autocast("cuda"):
                 # print("image shape: ", images.shape)
                 # Forward pass
                 preds = model(images)
+                # print("preds shape: ", preds.shape)
                 # print("preds_classes: ", preds.unique())
                 #   loss = criterion(pred, masks)
+                # print("mask_shape: ", masks.shape)
                 # print("mask_classes: ", masks.unique())  # Should show class indices (e.g., 0, 1, 2, 3)
                 # print("preds shape: ", preds.shape, preds.min(), preds.max())
 
                 loss = dice_loss(preds, masks)
+                # loss = criterion(preds, masks)
                 running_train_loss += loss.item()
         
             # dice = dice_score(pred , masks, n_classes)
@@ -99,12 +101,12 @@ def main():
         with torch.no_grad():
             for images, masks in tqdm(val_loader, desc="Validation"):
                 images = images.to(device)
-                masks = masks.to(device, dtype=torch.long).squeeze(1)
+                masks = masks.to(device).squeeze(1)
 
                 preds = model(images)
                 # print("mask_shape: ", masks.unique())  # Should show class indices (e.g., 0, 1, 2, 3)
                 # print("preds shape: ", preds.shape, preds.min(), preds.max())
-                # loss = criterion(pred, masks)
+                # loss = criterion(preds, masks)
                 loss = dice_loss(preds, masks)
                 running_val_loss += loss.item()
 

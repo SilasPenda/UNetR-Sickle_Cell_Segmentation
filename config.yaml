@@ -6,6 +6,7 @@ val_path: "/work/c-2iia/sp165339/Sickle_Cell_Segmentation/erythrocyte_data_multi
 
 
 image_size: 256
+num_classes: 4
 num_layers: 12
 hidden_dim: 768
 mlp_dim: 3072

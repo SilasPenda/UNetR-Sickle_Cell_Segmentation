@@ -32,7 +32,7 @@ def dice_loss(pred, target, smooth=1e-6):
         target_c = (target == c).float()  # Create a mask for class c
 
         intersection = (pred_c * target_c).sum((1, 2))  # Sum over each image separately
-        print(pred_c.shape, pred_c.sum(), target_c.shape, target_c.sum())
+        # print(pred_c.shape, pred_c.sum(), target_c.shape, target_c.sum())
 
         union = pred_c.sum((1, 2)) + target_c.sum((1, 2))
 

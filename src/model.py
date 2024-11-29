@@ -35,6 +35,7 @@ class UNETR_2D(nn.Module):
         super().__init__()
         config = get_config(config_filepath)
         self.image_size = config.get('image_size', 256)
+        self.num_classes = config.get('num_classes', 2)
         self.num_layers = config.get('num_layers', 12)
         self.hidden_dim = config.get('hidden_dim', 768)
         self.mlp_dim = config.get('mlp_dim', 3072)
@@ -121,7 +122,7 @@ class UNETR_2D(nn.Module):
         )
 
         # Output
-        self.output = nn.Conv2d(64, 1, kernel_size=1, padding=0)
+        self.output = nn.Conv2d(64, self.num_classes, kernel_size=1, padding=0)
 
     def forward(self, inputs):
         """ Patch + Position Embeddings """
@@ -182,6 +183,7 @@ class UNETR_2D(nn.Module):
 if __name__ == "__main__":
     config = {
         "image_size": 256,
+        "num_classes": 4,
         "num_layers": 12,
         "hidden_dim": 768,
         "mlp_dim": 3072,
