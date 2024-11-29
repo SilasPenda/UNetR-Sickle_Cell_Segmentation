@@ -1,0 +1,16 @@
+# train_path: "C:/Users/penda/Desktop/Workspace/My_Projects/U-NetR/erythrocyte_data_multi/train"
+# val_path: "C:/Users/penda/Desktop/Workspace/My_Projects/U-NetR/erythrocyte_data_multi/val"
+
+train_path: "/work/c-2iia/sp165339/Sickle_Cell_Segmentation/erythrocyte_data_multi/train"
+val_path: "/work/c-2iia/sp165339/Sickle_Cell_Segmentation/erythrocyte_data_multi/val"
+
+
+image_size: 256
+num_layers: 12
+hidden_dim: 768
+mlp_dim: 3072
+num_heads: 12
+dropout_rate: 0.1
+num_patches: 256
+patch_size: 16
+num_channels: 3

@@ -1,0 +1,10 @@
+albumentations
+numpy
+nibabel
+matplotlib
+pyyaml
+tqdm
+torch
+torchvision
+torchaudio
+torchsummary
